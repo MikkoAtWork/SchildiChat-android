@@ -258,8 +258,11 @@ internal class SyncResponseHandler @Inject constructor(
             return
         } // nothing on initial sync
 
+        android.util.Log.e("SCSCSC-PURU", "getting push rules")
         val rules = pushRuleService.getPushRules(RuleScope.GLOBAL).getAllRules()
+        android.util.Log.e("SCSCSC-PURU", "got push rules; execute")
         processEventForPushTask.execute(ProcessEventForPushTask.Params(roomsSyncResponse, rules))
+        android.util.Log.e("SCSCSC-PURU", "scheduled push task")
         Timber.v("[PushRules] <-- Push task scheduled")
     }
 }
