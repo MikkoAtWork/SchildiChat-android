@@ -40,6 +40,7 @@ internal class DefaultProcessEventForPushTask @Inject constructor(
 ) : ProcessEventForPushTask {
 
     override suspend fun execute(params: ProcessEventForPushTask.Params) {
+        android.util.Log.i("SCSCSC-propu", "EXEC-01")
         val newJoinEvents = params.syncResponse.join
                 .mapNotNull { (key, value) ->
                     value.timeline?.events?.mapNotNull {
@@ -47,12 +48,14 @@ internal class DefaultProcessEventForPushTask @Inject constructor(
                     }
                 }
                 .flatten()
+        android.util.Log.i("SCSCSC-propu", "EXEC-02")
 
         val inviteEvents = params.syncResponse.invite
                 .mapNotNull { (key, value) ->
                     value.inviteState?.events?.map { it.copy(roomId = key) }
                 }
                 .flatten()
+        android.util.Log.i("SCSCSC-propu", "EXEC-03")
 
         val allEvents = (newJoinEvents + inviteEvents).filter { event ->
             when (event.type) {
@@ -66,6 +69,8 @@ internal class DefaultProcessEventForPushTask @Inject constructor(
         }.filter {
             it.senderId != userId
         }
+        android.util.Log.i("SCSCSC-propu", "[PushRules] Found ${allEvents.size} out of ${(newJoinEvents + inviteEvents).size}" +
+                " to check for push rules with ${params.rules.size} rules")
         Timber.v("[PushRules] Found ${allEvents.size} out of ${(newJoinEvents + inviteEvents).size}" +
                 " to check for push rules with ${params.rules.size} rules")
         val matchedEvents = allEvents.mapNotNull { event ->
@@ -74,6 +79,7 @@ internal class DefaultProcessEventForPushTask @Inject constructor(
                 event to it
             }
         }
+        android.util.Log.i("SCSCSC-propu", "EXEC-04")
 
         val allRedactedEvents = params.syncResponse.join
                 .asSequence()
@@ -84,6 +90,7 @@ internal class DefaultProcessEventForPushTask @Inject constructor(
                 .toList()
 
         Timber.v("[PushRules] Found ${allRedactedEvents.size} redacted events")
+        android.util.Log.i("SCSCSC-propu", "[PushRules] Found ${allRedactedEvents.size} redacted events")
 
         defaultPushRuleService.dispatchEvents(
                 PushEvents(
@@ -93,5 +100,6 @@ internal class DefaultProcessEventForPushTask @Inject constructor(
                         redactedEventIds = allRedactedEvents
                 )
         )
+        android.util.Log.i("SCSCSC-propu", "EXEC-05")
     }
 }
