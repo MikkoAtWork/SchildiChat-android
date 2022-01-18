@@ -19,7 +19,9 @@ package org.matrix.android.sdk.internal.session.notification
 import org.matrix.android.sdk.api.pushrules.ConditionResolver
 import org.matrix.android.sdk.api.pushrules.rest.PushRule
 import org.matrix.android.sdk.api.session.events.model.Event
+import timber.log.Timber
 import javax.inject.Inject
+import kotlin.system.measureTimeMillis
 
 internal class PushRuleFinder @Inject constructor(
         private val conditionResolver: ConditionResolver
@@ -28,7 +30,13 @@ internal class PushRuleFinder @Inject constructor(
         return rules.firstOrNull { rule ->
             // All conditions must hold true for an event in order to apply the action for the event.
             rule.enabled && rule.conditions?.all {
-                it.asExecutableCondition(rule)?.isSatisfied(event, conditionResolver) ?: false
+                val tmp: Boolean
+                measureTimeMillis {
+                    tmp = it.asExecutableCondition(rule)?.isSatisfied(event, conditionResolver) ?: false
+                }.also {
+                    Timber.i("SCSCSC-purufi checking rule ${rule.ruleId} on event ${event.eventId} for satisfied took $it")
+                }
+                tmp
             } ?: false
         }
     }
