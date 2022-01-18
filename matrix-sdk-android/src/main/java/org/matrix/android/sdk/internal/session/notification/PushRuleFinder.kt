@@ -16,6 +16,7 @@
 
 package org.matrix.android.sdk.internal.session.notification
 
+import org.matrix.android.sdk.api.pushrules.Condition
 import org.matrix.android.sdk.api.pushrules.ConditionResolver
 import org.matrix.android.sdk.api.pushrules.rest.PushRule
 import org.matrix.android.sdk.api.session.events.model.Event
@@ -30,6 +31,20 @@ internal class PushRuleFinder @Inject constructor(
             rule.enabled && rule.conditions?.all {
                 it.asExecutableCondition(rule)?.isSatisfied(event, conditionResolver) ?: false
             } ?: false
+        }
+    }
+
+    fun fulfilledBingCondition(event: Event, conditions: List<Pair<Condition, PushRule>>): PushRule? {
+        return conditions.firstOrNull { it.first.isSatisfied(event, conditionResolver) }?.second
+    }
+
+    fun rulesToExecutableConditions(rules: List<PushRule>): List<Pair<Condition, PushRule>> {
+        return rules.flatMap { rule ->
+            if (rule.enabled) {
+                rule.conditions?.mapNotNull { condition -> condition.asExecutableCondition(rule)?.let { Pair(it, rule) } }
+            } else {
+                null
+            } ?: listOf()
         }
     }
 }

@@ -73,12 +73,23 @@ internal class DefaultProcessEventForPushTask @Inject constructor(
                 " to check for push rules with ${params.rules.size} rules")
         Timber.v("[PushRules] Found ${allEvents.size} out of ${(newJoinEvents + inviteEvents).size}" +
                 " to check for push rules with ${params.rules.size} rules")
+        Timber.i("SCSCSC-propu: try old fulfilledBingRule()")
         val matchedEvents = allEvents.mapNotNull { event ->
             pushRuleFinder.fulfilledBingRule(event, params.rules)?.let {
                 Timber.v("[PushRules] Rule $it match for event ${event.eventId}")
                 event to it
             }
         }
+        Timber.i("SCSCSC-propu: try new fulfilledBingRule(): prepare push conditions")
+        val pushConditions = pushRuleFinder.rulesToExecutableConditions(params.rules)
+        Timber.i("SCSCSC-propu: try new fulfilledBingRule(): iterate allEvents")
+        val newMatchedEvents = allEvents.mapNotNull { event ->
+            pushRuleFinder.fulfilledBingCondition(event, pushConditions)?.let {
+                Timber.v("[PushRules-new] Rule $it match for event ${event.eventId}")
+                event to it
+            }
+        }
+        Timber.i("SCSCSC-propu: new fulfilledBingRule(): result = old result: ${matchedEvents == newMatchedEvents}")
         Timber.i("SCSCSC-propu EXEC-04")
 
         val allRedactedEvents = params.syncResponse.join
