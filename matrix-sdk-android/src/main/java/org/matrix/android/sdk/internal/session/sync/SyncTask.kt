@@ -152,19 +152,19 @@ internal class DefaultSyncTask @Inject constructor(
             val nbRooms = syncResponse.rooms?.invite.orEmpty().size + syncResponse.rooms?.join.orEmpty().size + syncResponse.rooms?.leave.orEmpty().size
             val nbToDevice = syncResponse.toDevice?.events.orEmpty().size
             Timber.tag(loggerTag.value).d("Incremental sync request parsing, $nbRooms room(s) $nbToDevice toDevice(s)")
-            android.util.Log.e("SCSCSC-SYNC", "AAAAAA set status...")
+            Timber.i("SCSCSC-SYNC AAAAAA set status...")
             defaultSyncStatusService.setStatus(SyncStatusService.Status.IncrementalSyncParsing(
                     rooms = nbRooms,
                     toDevice = nbToDevice
             ))
-            android.util.Log.e("SCSCSC-SYNC", "AAAAAA handle response...")
+            Timber.i("SCSCSC-SYNC AAAAAA handle response...")
             syncResponseHandler.handleResponse(syncResponse, token, null)
-            android.util.Log.e("SCSCSC-SYNC", "AAAAAA handle response done...")
+            Timber.i("SCSCSC-SYNC AAAAAA handle response done...")
             syncResponseToReturn = syncResponse
             Timber.tag(loggerTag.value).d("Incremental sync done")
-            android.util.Log.e("SCSCSC-SYNC", "AAAAAA Incremental sync done")
+            Timber.i("SCSCSC-SYNC AAAAAA Incremental sync done")
             defaultSyncStatusService.setStatus(SyncStatusService.Status.IncrementalSyncDone)
-            android.util.Log.e("SCSCSC-SYNC", "AAAAAA Status set, all done")
+            Timber.i("SCSCSC-SYNC AAAAAA Status set, all done")
         }
         Timber.tag(loggerTag.value).d("Sync task finished on Thread: ${Thread.currentThread().name}")
         // Should throw if null as it's a mandatory value.

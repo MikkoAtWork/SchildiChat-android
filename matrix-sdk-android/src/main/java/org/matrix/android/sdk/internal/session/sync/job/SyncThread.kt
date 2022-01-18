@@ -144,16 +144,16 @@ internal class SyncThread @Inject constructor(private val syncTask: SyncTask,
         registerActiveCallsObserver()
         while (state != SyncState.Killing) {
             Timber.tag(loggerTag.value).d("Entering loop, state: $state")
-            android.util.Log.i("SCSCSC-qg", "Entering loop, state: $state")
+            Timber.i("SCSCSC-qg Entering loop, state: $state")
             if (!isStarted) {
                 Timber.tag(loggerTag.value).d("Sync is Paused. Waiting...")
-                android.util.Log.i("SCSCSC-qg", "Sync is Paused. Waiting...")
+                Timber.i("SCSCSC-qg Sync is Paused. Waiting...")
                 updateStateTo(SyncState.Paused)
                 synchronized(lock) { lock.wait() }
                 Timber.tag(loggerTag.value).d("...unlocked")
             } else if (!canReachServer) {
                 Timber.tag(loggerTag.value).d("No network. Waiting...")
-                android.util.Log.i("SCSCSC-qg", "No network. Waiting...")
+                Timber.i("SCSCSC-qg No network. Waiting...")
                 updateStateTo(SyncState.NoNetwork)
                 // We force retrying in RETRY_WAIT_TIME_MS maximum. Otherwise it will be unlocked by onConnectivityChanged() or restart()
                 retryNoNetworkTask = Timer(SyncState.NoNetwork.toString(), false).schedule(RETRY_WAIT_TIME_MS) {
@@ -165,37 +165,37 @@ internal class SyncThread @Inject constructor(private val syncTask: SyncTask,
                 synchronized(lock) { lock.wait() }
                 Timber.tag(loggerTag.value).d("...retry")
             } else if (!isTokenValid) {
-                android.util.Log.i("SCSCSC-qg", "Token is invalid")
+                Timber.i("SCSCSC-qg Token is invalid")
                 if (state == SyncState.Killing) {
                     continue
                 }
-                android.util.Log.i("SCSCSC-qg", "Token is invalid. Waiting...")
+                Timber.i("SCSCSC-qg Token is invalid. Waiting...")
                 Timber.tag(loggerTag.value).d("Token is invalid. Waiting...")
                 updateStateTo(SyncState.InvalidToken)
                 synchronized(lock) { lock.wait() }
                 Timber.tag(loggerTag.value).d("...unlocked")
             } else {
                 if (state !is SyncState.Running) {
-                    android.util.Log.i("SCSCSC-qg", "setting to sync state running")
+                    Timber.i("SCSCSC-qg setting to sync state running")
                     updateStateTo(SyncState.Running(afterPause = true))
-                    android.util.Log.i("SCSCSC-qg", "set to sync state running")
-                } else android.util.Log.i("SCSCSC-qg", "is already sync state running")
+                    Timber.i("SCSCSC-qg set to sync state running")
+                } else Timber.i("SCSCSC-qg is already sync state running")
                 val timeout = when {
                     previousSyncResponseHasToDevice                        -> 0L /* Force timeout to 0 */
                     state.let { it is SyncState.Running && it.afterPause } -> 0L /* No timeout after a pause */
                     else                                                   -> DEFAULT_LONG_POOL_TIMEOUT
                 }
                 Timber.tag(loggerTag.value).d("Execute sync request with timeout $timeout")
-                android.util.Log.i("SCSCSC-qg", "Execute sync request with timeout $timeout")
+                Timber.i("SCSCSC-qg Execute sync request with timeout $timeout")
                 val params = SyncTask.Params(timeout, SyncPresence.Online)
                 val sync = syncScope.launch {
                     previousSyncResponseHasToDevice = doSync(params)
                 }
-                android.util.Log.i("SCSCSC-qg", "Waiting for sync to finish")
+                Timber.i("SCSCSC-qg Waiting for sync to finish")
                 runBlocking {
                     sync.join()
                 }
-                android.util.Log.i("SCSCSC-qg", "sync finished")
+                Timber.i("SCSCSC-qg sync finished")
                 Timber.tag(loggerTag.value).d("...Continue")
             }
         }
@@ -260,7 +260,7 @@ internal class SyncThread @Inject constructor(private val syncTask: SyncTask,
 
     private fun updateStateTo(newState: SyncState) {
         Timber.tag(loggerTag.value).d("Update state from $state to $newState")
-        android.util.Log.i("SCSCSC-qg", "Updating state from $state to $newState")
+        Timber.i("SCSCSC-qg Updating state from $state to $newState")
         if (newState == state) {
             return
         }
@@ -268,7 +268,7 @@ internal class SyncThread @Inject constructor(private val syncTask: SyncTask,
         debouncer.debounce("post_state", {
             liveState.value = newState
         }, 150)
-        android.util.Log.i("SCSCSC-qg", "Updated state from $state to $newState")
+        Timber.i("SCSCSC-qg Updated state from $state to $newState")
     }
 
     override fun onMoveToForeground() {
