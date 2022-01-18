@@ -18,7 +18,8 @@ package im.vector.app.features.call
 
 enum class CameraType {
     FRONT,
-    BACK
+    BACK,
+    EXTERNAL
 }
 
 data class CameraProxy(

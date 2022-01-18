@@ -556,8 +556,20 @@ class WebRtcCall(
                     CameraProxy(it, CameraType.BACK).also { availableCamera.add(it) }
                 }
 
+        // Assume that camera is external if it's neither front-facing nor back-facing
+        val externalCamera = cameraIterator.deviceNames
+                ?.firstOrNull { !cameraIterator.isBackFacing(it) && !cameraIterator.isFrontFacing(it) }
+                ?.let {
+                    CameraProxy(it, CameraType.EXTERNAL).also { availableCamera.add(it) }
+                }
+
+
         val camera = frontCamera?.also { cameraInUse = frontCamera }
                 ?: backCamera?.also { cameraInUse = backCamera }
+                ?: externalCamera?.also {
+                    currentCaptureFormat = CaptureFormat.SD
+                    cameraInUse = externalCamera
+                }
                 ?: null.also { cameraInUse = null }
 
         listeners.forEach {
