@@ -23,10 +23,14 @@ import org.matrix.android.sdk.api.pushrules.SenderNotificationPermissionConditio
 import org.matrix.android.sdk.api.session.events.model.Event
 import org.matrix.android.sdk.api.session.events.model.EventType
 import org.matrix.android.sdk.api.session.events.model.toModel
+import org.matrix.android.sdk.api.session.room.Room
 import org.matrix.android.sdk.api.session.room.model.PowerLevelsContent
 import org.matrix.android.sdk.internal.di.UserId
+import org.matrix.android.sdk.internal.session.notification.measureTimeMillisAndComplain
 import org.matrix.android.sdk.internal.session.room.RoomGetter
 import javax.inject.Inject
+import kotlin.contracts.ExperimentalContracts
+import kotlin.system.measureTimeMillis
 
 internal class DefaultConditionResolver @Inject constructor(
         private val roomGetter: RoomGetter,
@@ -35,7 +39,11 @@ internal class DefaultConditionResolver @Inject constructor(
 
     override fun resolveEventMatchCondition(event: Event,
                                             condition: EventMatchCondition): Boolean {
-        return condition.isSatisfied(event)
+        val result: Boolean
+        measureTimeMillisAndComplain("SCSCSC-decore resolving event match condition $condition for event ${event.eventId} in room ${event.roomId}") {
+            result = condition.isSatisfied(event)
+        }
+        return result
     }
 
     override fun resolveRoomMemberCountCondition(event: Event,
@@ -45,15 +53,26 @@ internal class DefaultConditionResolver @Inject constructor(
 
     override fun resolveSenderNotificationPermissionCondition(event: Event,
                                                               condition: SenderNotificationPermissionCondition): Boolean {
-        val roomId = event.roomId ?: return false
-        val room = roomGetter.getRoom(roomId) ?: return false
+        val roomId: String
+        val room: Room
+        measureTimeMillisAndComplain("SCSCSC-decore getting room ${event.roomId}") {
+            roomId = event.roomId ?: return false
+            room = roomGetter.getRoom(roomId) ?: return false
+        }
 
-        val powerLevelsContent = room.getStateEvent(EventType.STATE_ROOM_POWER_LEVELS)
-                ?.content
-                ?.toModel<PowerLevelsContent>()
-                ?: PowerLevelsContent()
+        val powerLevelsContent: PowerLevelsContent
+        measureTimeMillisAndComplain("SCSCSC-decore getting power levels content for room ${event.roomId}") {
+            powerLevelsContent = room.getStateEvent(EventType.STATE_ROOM_POWER_LEVELS)
+                    ?.content
+                    ?.toModel<PowerLevelsContent>()
+                    ?: PowerLevelsContent()
+        }
 
-        return condition.isSatisfied(event, powerLevelsContent)
+        val result: Boolean
+        measureTimeMillisAndComplain("SCSCSC-decore executing condition.isSatisfied") {
+            result = condition.isSatisfied(event, powerLevelsContent)
+        }
+        return result
     }
 
     override fun resolveContainsDisplayNameCondition(event: Event,

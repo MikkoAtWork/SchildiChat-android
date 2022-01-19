@@ -18,6 +18,10 @@ package org.matrix.android.sdk.api.pushrules
 import org.matrix.android.sdk.api.session.events.model.Event
 import org.matrix.android.sdk.api.session.room.model.PowerLevelsContent
 import org.matrix.android.sdk.api.session.room.powerlevels.PowerLevelsHelper
+import org.matrix.android.sdk.internal.session.notification.measureTimeMillisAndComplain
+import timber.log.Timber
+import kotlin.contracts.ExperimentalContracts
+import kotlin.system.measureTimeMillis
 
 class SenderNotificationPermissionCondition(
         /**
@@ -36,7 +40,14 @@ class SenderNotificationPermissionCondition(
     override fun technicalDescription() = "User power level <$key>"
 
     fun isSatisfied(event: Event, powerLevels: PowerLevelsContent): Boolean {
-        val powerLevelsHelper = PowerLevelsHelper(powerLevels)
-        return event.senderId != null && powerLevelsHelper.getUserPowerLevelValue(event.senderId) >= powerLevels.notificationLevel(key)
+        val powerLevelsHelper: PowerLevelsHelper
+        measureTimeMillisAndComplain("SCSCSC-senopeco getting power levels for event ${event.eventId} in room ${event.roomId}") {
+            powerLevelsHelper = PowerLevelsHelper(powerLevels)
+        }
+        val result: Boolean
+        measureTimeMillisAndComplain("SCSCSC-senopeco evaluating power levels for event ${event.eventId} in room ${event.roomId}") {
+            result = event.senderId != null && powerLevelsHelper.getUserPowerLevelValue(event.senderId) >= powerLevels.notificationLevel(key)
+        }
+        return result
     }
 }

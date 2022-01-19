@@ -21,6 +21,9 @@ import org.matrix.android.sdk.api.pushrules.rest.PushRule
 import org.matrix.android.sdk.api.session.events.model.Event
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.system.measureTimeMillis
 
 internal class PushRuleFinder @Inject constructor(
@@ -31,13 +34,23 @@ internal class PushRuleFinder @Inject constructor(
             // All conditions must hold true for an event in order to apply the action for the event.
             rule.enabled && rule.conditions?.all {
                 val tmp: Boolean
-                measureTimeMillis {
+                measureTimeMillisAndComplain("SCSCSC-purufi checking rule ${rule.ruleId} on event ${event.eventId} in room ${event.roomId} for satisfied") {
                     tmp = it.asExecutableCondition(rule)?.isSatisfied(event, conditionResolver) ?: false
-                }.also {
-                    Timber.i("SCSCSC-purufi checking rule ${rule.ruleId} on event ${event.eventId} for satisfied took $it")
                 }
                 tmp
             } ?: false
+        }
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun measureTimeMillisAndComplain(message: String, block: () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    measureTimeMillis(block).also {
+        if (it >= 10L) {
+            Timber.i("$message took $it")
         }
     }
 }
