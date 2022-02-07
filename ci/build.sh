@@ -10,7 +10,7 @@ echo "$(date): Workplace path: $workplace"
 # Copy artifacts
 echo "$(date): Copy artifacts"
 mkdir -p $outputpath
-cp /workspace/platforms/android/app/build/outputs/apk/debug/*.apk $outputpath/
+cp vector/build/outputs/apk/fdroid/debug/*.apk $outputpath/
 
 
 
