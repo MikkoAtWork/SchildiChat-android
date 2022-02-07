@@ -1,6 +1,8 @@
 steps:
   - name: "eu.gcr.io/ivam-dev/cloudbuild-android"
     args: ["ci/build.sh"]
+options:
+  machineType: "C2_STANDARD_4"
 timeout: 7200s
 artifacts:
   objects:
