@@ -1,7 +1,7 @@
 #!/bin/bash
 
 workplace=$(pwd)
-#outputpath=$workplace/out
+outputpath=$workplace/out
 
 echo "$(date): Workplace path: $workplace"
 
