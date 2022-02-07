@@ -1,10 +1,10 @@
 steps:
   - name: "eu.gcr.io/ivam-dev/cloudbuild-android"
-    args: ["./build.sh"]
+    args: ["ci/build.sh"]
 timeout: 7200s
 artifacts:
   objects:
-    location: "gs://apk-builds/test/"
+    location: "gs://schildichat-builds/$BUILD_ID/"
     paths: ["out/*.apk"]
 
 
