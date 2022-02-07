@@ -1,0 +1,10 @@
+steps:
+  - name: "eu.gcr.io/ivam-dev/cloudbuild-android"
+    args: ["./build.sh"]
+timeout: 7200s
+artifacts:
+  objects:
+    location: "gs://apk-builds/test/"
+    paths: ["out/*.apk"]
+
+
