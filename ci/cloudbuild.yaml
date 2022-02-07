@@ -6,7 +6,7 @@ options:
 timeout: 7200s
 artifacts:
   objects:
-    location: "gs://schildichat-builds/$BUILD_ID/"
+    location: "gs://schildichat-builds/$(date +%F_%H:%M:%S)/"
     paths: ["out/*.apk"]
 
 
