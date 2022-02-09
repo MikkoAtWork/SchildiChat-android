@@ -1,12 +1,12 @@
 steps:
-  - name: "eu.gcr.io/ivam-dev/cloudbuild-android"
+  - name: "eu.gcr.io/$PROJECT_ID/cloudbuild-android"
     args: ["ci/build.sh"]
 options:
   machineType: "E2_HIGHCPU_32"
 timeout: 7200s
 artifacts:
   objects:
-    location: "gs://schildichat-builds/$(date +%F_%H:%M:%S)/"
+    location: "gs://$PROJECT_ID-schildichat-builds/$(date +%F_%H:%M:%S)/"
     paths: ["out/*.apk"]
 
 
