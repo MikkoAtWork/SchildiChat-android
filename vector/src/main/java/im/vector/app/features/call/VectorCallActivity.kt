@@ -495,7 +495,7 @@ class VectorCallActivity : VectorBaseActivity<ActivityCallBinding>(), CallContro
         // Init Full Screen renderer
         views.fullscreenRenderer.init(rootEglBase!!.eglBaseContext, null)
         views.fullscreenRenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL)
-        views.fullscreenRenderer.setEnableHardwareScaler(true /* enabled */)
+        views.fullscreenRenderer.setEnableHardwareScaler(false /* enabled */)
 
         val callId = withState(callViewModel) { it.callId }
         callManager.getCallById(callId)?.also { webRtcCall ->
